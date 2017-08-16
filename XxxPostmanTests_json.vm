@@ -1,71 +1,22 @@
+#checkId($entity)
 #set ( $uncapitalizedEntityName = ${fn.uncapitalize($entity.name)})
 ##
 ## #set ( $URL_ROOT = "http://localhost:3000/api/v1" ) ## for Node.js
 ## #set ( $URL_ROOT = "http://localhost:8080/(WEB-APP-NAME)/api/v1" ) ## for Java Web App
 #set ( $URL_ROOT = "http://localhost:8080/test-new-java-web-jaxrs1/api/v1" ) ## for Java Web App
-##
-## Set some values for the tests
-#*
-#set ( $testValues =  [] )
-#foreach ( $attrib in $entity.attributes )
-#set( $intString = $foreach.count )
-#if ( $attrib.type == "int" || $attrib.type == "Integer" || $attrib.type == "Short" ) 
-#set ( $val = $testValues.add(77) )
-#elseif ( $attrib.type == "BigDecimal" )
-#set ( $val = $testValues.add(99.99) )
-#elseif ( $attrib.type == "boolean" )
-#set ( $val = $testValues.add(true) )
-#elseif ( $attrib.type == "Date" )
-#set ( $val = $testValues.add('2012-04-23T18:25:43.511Z') )
-#else
-#set ( $val = $testValues.add('lorem ipsum') )
-#end
-#end
-*#
-##
-## Prepare rawJsonRequest (for Create & Update POST requests)
-#*
-#set ( $rawJsonRequest = '' )
-#foreach( $attrib in $entity.attributes )
-#if ( $foreach.count > 1 )
-#set ( $rawJsonRequest = $rawJsonRequest + ',' )
-#end
-#if ( $attrib.type == "int" || $attrib.type == "Integer" || $attrib.type == "BigDecimal" || $attrib.type == "boolean" )
-#set ( $rawJsonRequest = $rawJsonRequest + '\n\t\"' + $attrib.name + '\": ' + $testValues[$foreach.index] )
-#else 
-#set ( $rawJsonRequest = $rawJsonRequest + '\n\t\"' + $attrib.name + '\": ' + '\"' + $testValues[$foreach.index] + '\"' )
-#end
-#end
-*#
-## end foreach
-##
-## Prepare GET params (Entity primary key(s))
-#*
-#set ( $getParams = '' )
-#foreach ( $key in $entity.keyAttributes )
-#if ( $foreach.count > 1 )
-#set ( $getParams = $getParams + '/' )
-#end
-#set ( $getParams = $getParams + $testValues[$foreach.index] )
-#end
-*#
-## end foreach
-
-## ---------- NEW 
-#checkId($entity)
 ##--- Build LITERAL VALUES for JAVASCRIPT LANGUAGE
 $env.setLanguage('JavaScript') 
 #set ( $values = $fn.buildValues($entity.attributes, 1) )
-## REQUEST BODY : JSON 
-#set ( $body = $values.toJSON("\n\t") )
+## REQUEST BODY ( JSON String ) 
+#set ( $body = $values.toJSON("\n\t", "\n") )
 #set ( $requestBody = $fn.backslash( $body, $QUOT) )
 ## REQUEST URL PARAM FOR PRIMARY KEY
-#set ( $getParams = '' )
+#set ( $requestIdParams = '' )
 #foreach ( $keyAttrib in $entity.keyAttributes )
 #if ( $foreach.count > 1 )
-#set ( $getParams = $getParams + '/' )
+#set ( $requestIdParams = $requestIdParams + '/' )
 #end
-#set ( $getParams = $getParams + $values.getValue(${keyAttrib.name}) )
+#set ( $requestIdParams = $requestIdParams + $values.getValue(${keyAttrib.name}) )
 #end
 ## ---------- 
 {
@@ -151,7 +102,7 @@ $env.setLanguage('JavaScript')
 				}
 			],
 			"request": {
-				"url": "${URL_ROOT}/$uncapitalizedEntityName/$getParams",
+				"url": "${URL_ROOT}/$uncapitalizedEntityName/$requestIdParams",
 				"method": "GET",
 				"header": [],
 				"body": {},
@@ -235,7 +186,7 @@ $env.setLanguage('JavaScript')
 				}
 			],
 			"request": {
-				"url": "${URL_ROOT}/$uncapitalizedEntityName/$getParams",
+				"url": "${URL_ROOT}/$uncapitalizedEntityName/$requestIdParams",
 				"method": "PUT",
 				"header": [
 					{
@@ -322,7 +273,7 @@ $env.setLanguage('JavaScript')
 				}
 			],
 			"request": {
-				"url": "${URL_ROOT}/$uncapitalizedEntityName/$getParams",
+				"url": "${URL_ROOT}/$uncapitalizedEntityName/$requestIdParams",
 				"method": "DELETE",
 				"header": [],
 				"body": {
