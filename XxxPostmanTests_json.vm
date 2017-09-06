@@ -1,9 +1,11 @@
 #checkId($entity)
 #set ( $uncapitalizedEntityName = ${fn.uncapitalize($entity.name)})
-##
-## #set ( $URL_ROOT = "http://localhost:3000/api/v1" ) ## for Node.js
-## #set ( $URL_ROOT = "http://localhost:8080/(WEB-APP-NAME)/api/v1" ) ## for Java Web App
-#set ( $URL_ROOT = "http://localhost:8080/test-new-java-web-jaxrs1/api/v1" ) ## for Java Web App
+## 2 variables must be defined :
+## $REST_URL_ROOT ( eg "http://localhost:3000" or "http://localhost:8080/project-name" )
+## $REST_API_ROOT ( eg "/api/v1" )
+#using("REST_URL_ROOT", "REST_API_ROOT" )
+#set ( $URL_ROOT = "${REST_URL_ROOT}${REST_API_ROOT}" )
+
 ##--- Build LITERAL VALUES for JAVASCRIPT LANGUAGE
 $env.setLanguage('JavaScript') 
 #set ( $values = $fn.buildValues($entity.attributes, 1) )
@@ -16,7 +18,7 @@ $env.setLanguage('JavaScript')
 #if ( $foreach.count > 1 )
 #set ( $requestIdParams = $requestIdParams + '/' )
 #end
-#set ( $requestIdParams = $requestIdParams + $values.getValue(${keyAttrib.name}) )
+#set ( $requestIdParams = $requestIdParams + $fn.unquote( $values.getValue(${keyAttrib.name}) ) )
 #end
 ## ---------- 
 {
@@ -345,6 +347,5 @@ $env.setLanguage('JavaScript')
 			"response": []
 		}
 *#
-
 	]
 }
